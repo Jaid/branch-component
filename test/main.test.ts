@@ -19,29 +19,9 @@ describe('positive conditions', () => {
       children: child,
     })).toBeNull()
   })
-  test('condition is an alias for if', () => {
-    expect(branch({
-      condition: 1,
-      children: child,
-    })).toBe(child)
-    expect(branch({
-      condition: 0,
-      children: child,
-    })).toBeNull()
-  })
 })
 describe('negative conditions', () => {
-  test('unless renders for falsy values', () => {
-    expect(branch({
-      unless: false,
-      children: child,
-    })).toBe(child)
-    expect(branch({
-      unless: true,
-      children: child,
-    })).toBeNull()
-  })
-  test('not is an alias for unless', () => {
+  test('not renders for falsy values', () => {
     expect(branch({
       not: null,
       children: child,
@@ -114,20 +94,6 @@ describe('combined conditions', () => {
       children: child,
     })).toBeNull()
   })
-  test('allows aliases to be combined', () => {
-    expect(branch({
-      if: true,
-      condition: 1,
-      unless: false,
-      not: null,
-      children: child,
-    })).toBe(child)
-    expect(branch({
-      if: true,
-      condition: 0,
-      children: child,
-    })).toBeNull()
-  })
   test('ANDs scalar and collection conditions', () => {
     expect(branch({
       if: true,
@@ -177,6 +143,29 @@ describe('then', () => {
       expect(result.type).toBe(Success)
     }
   })
+  test('defers a lazy then function until React renders the selected branch', () => {
+    let calls = 0
+    const lazy = () => {
+      calls++
+      return 'lazy success'
+    }
+    const ignored = branch({
+      if: false,
+      then: lazy,
+    })
+    expect(ignored).toBeNull()
+    expect(calls).toBe(0)
+    const result = branch({
+      if: true,
+      then: lazy,
+    })
+    expect(calls).toBe(0)
+    expect(isValidElement(result)).toBeTrue()
+    if (isValidElement(result) && typeof result.type === 'function') {
+      expect((result.type as () => unknown)()).toBe('lazy success')
+      expect(calls).toBe(1)
+    }
+  })
   test('renders then before children in a fragment when both are supplied', () => {
     const result = branch({
       if: true,
@@ -215,6 +204,31 @@ describe('else', () => {
     expect(isValidElement(result)).toBeTrue()
     if (isValidElement(result)) {
       expect(result.type).toBe(Fallback)
+    }
+  })
+  test('defers a lazy else function until React renders the failed branch', () => {
+    let calls = 0
+    const lazy = () => {
+      calls++
+      return 'lazy fallback'
+    }
+    const ignored = branch({
+      if: true,
+      else: lazy,
+      children: child,
+    })
+    expect(ignored).toBe(child)
+    expect(calls).toBe(0)
+    const result = branch({
+      if: false,
+      else: lazy,
+      children: child,
+    })
+    expect(calls).toBe(0)
+    expect(isValidElement(result)).toBeTrue()
+    if (isValidElement(result) && typeof result.type === 'function') {
+      expect((result.type as () => unknown)()).toBe('lazy fallback')
+      expect(calls).toBe(1)
     }
   })
 })

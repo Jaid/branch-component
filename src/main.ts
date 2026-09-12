@@ -3,7 +3,7 @@ import type {ComponentType, ReactNode} from 'react'
 
 import {createElement, Fragment} from 'react'
 
-type BranchProps = {
+export type BranchProps = {
   children?: ReactNode
   else?: BranchOutput
   then?: BranchOutput
@@ -11,15 +11,14 @@ type BranchProps = {
 
 type BranchConditions = {
   all?: ReadonlyArray<unknown>
-  condition?: unknown
   if?: unknown
   none?: ReadonlyArray<unknown>
   not?: unknown
   some?: ReadonlyArray<unknown>
-  unless?: unknown
 }
 
-type BranchOutput = ComponentType | ReactNode
+type LazyBranchOutput = () => ReactNode
+type BranchOutput = ComponentType | LazyBranchOutput | ReactNode
 
 const renderOutput = (output: BranchOutput | undefined): ReactNode => {
   if (typeof output === 'function') {
@@ -29,8 +28,6 @@ const renderOutput = (output: BranchOutput | undefined): ReactNode => {
 }
 const Branch = (props: BranchProps): ReactNode => {
   const failed = Boolean('if' in props && !props.if
-      || 'condition' in props && !props.condition
-      || 'unless' in props && props.unless
       || 'not' in props && props.not
       || 'some' in props && !props.some?.some(Boolean)
       || 'none' in props && props.none?.some(Boolean)

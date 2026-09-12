@@ -16,11 +16,9 @@ import Branch from 'branch-component'
 <Branch if={isVisible}>{child}</Branch>
 ```
 
-`if` and `condition` render children when their value is truthy. `unless` and `not` render children when their value is falsy.
+`if` renders children when its value is truthy. `not` renders children when its value is falsy.
 
 ```tsx
-<Branch condition={isVisible}>{child}</Branch>
-<Branch unless={isLoading}>{child}</Branch>
 <Branch not={isLoading}>{child}</Branch>
 ```
 
@@ -48,21 +46,23 @@ At least one condition prop is required in TypeScript.
 
 ## Else
 
-Use `else` to render a fallback when any condition fails. It can be any React child or a component. Component values are converted to elements automatically.
+Use `else` to render a fallback when any condition fails. It can be any React child, an uninstantiated component, or a lazy function. Functions are converted to React elements, so they are only invoked if React actually renders the failed branch.
 
 ```tsx
 <Branch if={isVisible} else={<Hidden />}>{visible}</Branch>
 <Branch if={isVisible} else={Hidden}>{visible}</Branch>
+<Branch if={isVisible} else={() => expensiveFallback()}>{visible}</Branch>
 ```
 
 ## Then
 
-Use `then` for the successful branch. Like `else`, it can be a React node or an uninstantiated component, which is converted to an element automatically.
+Use `then` for the successful branch. Like `else`, it can be a React node, an uninstantiated component, or a lazy function. Functions are converted to React elements, so they are only invoked if React actually renders the successful branch.
 
 ```tsx
 <Branch if={isVisible} then={<Visible />} />
 <Branch if={isVisible} then={Visible} />
 <Branch if={isVisible} then={Visible} else={Hidden} />
+<Branch if={isVisible} then={() => expensiveContent()} />
 ```
 
 When both `then` and JSX children are supplied, both are rendered in a fragment with `then` first.
