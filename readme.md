@@ -45,10 +45,10 @@ At least one condition prop is required in TypeScript.
 
 ## className
 
-Use `className` to forward a class to the top-level elements of whichever branch renders. Existing class names are preserved, with the Branch class appended after them.
+Use `className` to forward one or more classes to the top-level elements of whichever branch renders. It accepts a string or an array of strings and nullish values. Nullish values are filtered before forwarding. Existing class names are preserved, with the Branch classes appended after them.
 
 ```tsx
-<Branch if={isVisible} className={css.visible}>
+<Branch if={isVisible} className={[css.visible, css.active, undefined, null]}>
   <Content className={css.content} />
 </Branch>
 ```
@@ -56,7 +56,7 @@ Use `className` to forward a class to the top-level elements of whichever branch
 This is equivalent to:
 
 ```tsx
-<Content className={`${css.content} ${css.visible}`} />
+<Content className={`${css.content} ${css.visible} ${css.active}`} />
 ```
 
 The same behavior applies to `then` and `else`. Bare components receive `className` as a prop. Fragments and arrays forward it to each top-level element, while non-element nodes such as text are left unchanged.

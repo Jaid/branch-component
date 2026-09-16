@@ -35,6 +35,7 @@
     "eslint": "10.10.0",
     "eslint-config-jaid": "31.0.0",
     "tsconfig-jaid-react": "16.0.0",
+    "type-fest": "5.9.0",
     "typescript": "npm:typescript-classic@6.0.4"
   },
   "sideEffects": false

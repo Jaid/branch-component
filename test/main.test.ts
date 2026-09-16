@@ -182,6 +182,28 @@ describe('then', () => {
   })
 })
 describe('className', () => {
+  test('filters nullish class names before passing them', () => {
+    const result = branch({
+      if: true,
+      className: ['branch', undefined, null, 'active'],
+      then: Success,
+    })
+    expect(isValidElement<{className?: string}>(result)).toBeTrue()
+    if (isValidElement<{className?: string}>(result)) {
+      expect(result.props.className).toBe('branch active')
+    }
+  })
+  test('does not pass className when every provided value is nullish', () => {
+    const result = branch({
+      if: true,
+      className: [undefined, null],
+      then: Success,
+    })
+    expect(isValidElement<{className?: string}>(result)).toBeTrue()
+    if (isValidElement<{className?: string}>(result)) {
+      expect(result.props.className).toBeUndefined()
+    }
+  })
   test('passes className to bare then and else components', () => {
     const thenResult = branch({
       if: true,
