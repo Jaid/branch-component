@@ -55,8 +55,8 @@ const valid: Array<BranchProps> = [
     all: [true],
   },
 ]
-void valid
-void branch
+valid
+branch
 // @ts-expect-error TS2322 At least one condition prop is required.
 const missing: BranchProps = {else: 'fallback'}
 // @ts-expect-error TS2322 Removed alias is not a condition prop.
@@ -65,7 +65,7 @@ const removedCondition: BranchProps = {condition: true}
 const removedUnless: BranchProps = {unless: false}
 // @ts-expect-error TS2322 Collection modes require readonly arrays.
 const invalidCollection: BranchProps = {some: true}
-void missing
-void removedCondition
-void removedUnless
-void invalidCollection
+missing
+removedCondition
+removedUnless
+invalidCollection
