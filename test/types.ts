@@ -41,6 +41,11 @@ const valid: Array<BranchProps> = [
   },
   {
     if: true,
+    className: 'branch',
+    then: Success,
+  },
+  {
+    if: true,
     not: false,
   },
   {

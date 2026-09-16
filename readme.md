@@ -43,6 +43,23 @@ Condition props can be combined freely. Every provided condition must pass, so d
 
 At least one condition prop is required in TypeScript.
 
+## className
+
+Use `className` to forward a class to the top-level elements of whichever branch renders. Existing class names are preserved, with the Branch class appended after them.
+
+```tsx
+<Branch if={isVisible} className={css.visible}>
+  <Content className={css.content} />
+</Branch>
+```
+
+This is equivalent to:
+
+```tsx
+<Content className={`${css.content} ${css.visible}`} />
+```
+
+The same behavior applies to `then` and `else`. Bare components receive `className` as a prop. Fragments and arrays forward it to each top-level element, while non-element nodes such as text are left unchanged.
 
 ## Else
 

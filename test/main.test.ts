@@ -1,7 +1,9 @@
 /* eslint-disable unicorn/no-thenable */
+import type {ReactNode} from 'react'
+
 import {describe, expect, test} from 'bun:test'
 
-import {Fragment, isValidElement} from 'react'
+import {createElement, Fragment, isValidElement} from 'react'
 
 import branch from '#src/main.ts'
 
@@ -177,6 +179,118 @@ describe('then', () => {
       expect(result.type).toBe(Fragment)
       expect(result.props.children).toEqual(['then', 'children'])
     }
+  })
+})
+describe('className', () => {
+  test('passes className to bare then and else components', () => {
+    const thenResult = branch({
+      if: true,
+      className: 'branch',
+      then: Success,
+    })
+    expect(isValidElement<{className?: string}>(thenResult)).toBeTrue()
+    if (isValidElement<{className?: string}>(thenResult)) {
+      expect(thenResult.props.className).toBe('branch')
+    }
+    const elseResult = branch({
+      if: false,
+      className: 'branch',
+      else: Fallback,
+    })
+    expect(isValidElement<{className?: string}>(elseResult)).toBeTrue()
+    if (isValidElement<{className?: string}>(elseResult)) {
+      expect(elseResult.props.className).toBe('branch')
+    }
+  })
+  test('merges className after an explicit className on instantiated outputs', () => {
+    const thenResult = branch({
+      if: true,
+      className: 'branch',
+      then: createElement('div', {className: 'own'}),
+    })
+    expect(isValidElement<{className?: string}>(thenResult)).toBeTrue()
+    if (isValidElement<{className?: string}>(thenResult)) {
+      expect(thenResult.props.className).toBe('own branch')
+    }
+    const elseResult = branch({
+      if: false,
+      className: 'branch',
+      else: createElement('div', {className: 'fallback'}),
+    })
+    expect(isValidElement<{className?: string}>(elseResult)).toBeTrue()
+    if (isValidElement<{className?: string}>(elseResult)) {
+      expect(elseResult.props.className).toBe('fallback branch')
+    }
+  })
+  test('passes and merges className into children', () => {
+    const result = branch({
+      if: true,
+      className: 'branch',
+      children: [
+        createElement('div', {
+          className: 'first',
+          key: 'first',
+        }),
+        createElement('span', {key: 'second'}),
+        'text',
+      ],
+    })
+    expect(Array.isArray(result)).toBeTrue()
+    if (Array.isArray(result)) {
+      const children = result as Array<ReactNode>
+      expect(isValidElement<{className?: string}>(children[0])).toBeTrue()
+      expect(isValidElement<{className?: string}>(children[1])).toBeTrue()
+      if (isValidElement<{className?: string}>(children[0]) && isValidElement<{className?: string}>(children[1])) {
+        expect(children[0].props.className).toBe('first branch')
+        expect(children[1].props.className).toBe('branch')
+      }
+      expect(children[2]).toBe('text')
+    }
+  })
+  test('passes className through fragments', () => {
+    const result = branch({
+      if: true,
+      className: 'branch',
+      children: createElement(Fragment, null, createElement('div', {className: 'own'}), createElement('span')),
+    })
+    expect(isValidElement<{children?: Array<unknown>}>(result)).toBeTrue()
+    if (isValidElement<{children?: Array<unknown>}>(result)) {
+      const children = result.props.children
+      expect(Array.isArray(children)).toBeTrue()
+      if (Array.isArray(children)) {
+        expect(isValidElement<{className?: string}>(children[0])).toBeTrue()
+        expect(isValidElement<{className?: string}>(children[1])).toBeTrue()
+        if (isValidElement<{className?: string}>(children[0]) && isValidElement<{className?: string}>(children[1])) {
+          expect(children[0].props.className).toBe('own branch')
+          expect(children[1].props.className).toBe('branch')
+        }
+      }
+    }
+  })
+  test('applies className to then and children when both are rendered', () => {
+    const result = branch({
+      if: true,
+      className: 'branch',
+      then: createElement('header', {className: 'header'}),
+      children: createElement('main', {className: 'content'}),
+    })
+    expect(isValidElement<{children: Array<unknown>}>(result)).toBeTrue()
+    if (isValidElement<{children: Array<unknown>}>(result)) {
+      const [thenOutput, childrenOutput] = result.props.children
+      expect(isValidElement<{className?: string}>(thenOutput)).toBeTrue()
+      expect(isValidElement<{className?: string}>(childrenOutput)).toBeTrue()
+      if (isValidElement<{className?: string}>(thenOutput) && isValidElement<{className?: string}>(childrenOutput)) {
+        expect(thenOutput.props.className).toBe('header branch')
+        expect(childrenOutput.props.className).toBe('content branch')
+      }
+    }
+  })
+  test('leaves non-element children unchanged', () => {
+    expect(branch({
+      if: true,
+      className: 'branch',
+      children: 'text',
+    })).toBe('text')
   })
 })
 describe('else', () => {
